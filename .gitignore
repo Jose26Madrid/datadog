@@ -1,0 +1,6 @@
+aws.pem
+main.tf
+terraform*
+/terraform*
+.terraform/
+.terraform.*
