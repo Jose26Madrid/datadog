@@ -1,68 +1,111 @@
-# Monitoreo de AWS con Datadog (sin agentes)
+# Monitoreo con Datadog y despliegue de imágenes en AWS
 
-Este archivo describe cómo integrar Datadog con tu cuenta de AWS para monitoreo completo **sin instalar agentes**, usando únicamente la integración oficial basada en CloudWatch.
+Este proyecto demuestra cómo:
 
----
-
-## 🚀 Paso 1: Crear cuenta en Datadog
-
-1. Visita [https://www.datadoghq.com](https://www.datadoghq.com)
-2. Haz clic en **“Free Trial”** (prueba gratuita).
-3. Regístrate con tu email (no se necesita tarjeta de crédito).
-4. Elige **"AWS"** como fuente de datos cuando se te pregunte.
+- Crear una instancia EC2 con Terraform
+- Instalar el agente de Datadog
+- Subir imágenes Docker a ECR
+- Ejecutar contenedores y visualizar métricas en Datadog
 
 ---
 
-## 🔗 Paso 2: Conectar tu cuenta de AWS a Datadog
+## 🔧 Requisitos
 
-1. En Datadog, ve a **Integrations > Integrations**.
-2. Busca **"Amazon Web Services"** y haz clic.
-3. Pulsa **“Install Integration”**.
-4. Utiliza el botón para **crear el rol IAM automáticamente**:
-   - Te abrirá un link de CloudFormation.
-   - Haz clic en **"Create Stack"** y luego **"Submit"**.
-   - Se creará un **rol IAM de solo lectura** confiado por Datadog.
-
-🛡️ Seguridad: Datadog sólo podrá leer métricas y metadatos. No puede modificar recursos.
+- Cuenta de AWS
+- Cuenta en Datadog (región EU)
+- Terraform instalado
+- Docker y AWS CLI configurados
 
 ---
 
-## ⏱ Paso 3: Esperar unos minutos
+## 🚀 Infraestructura con Terraform
 
-- Datadog comenzará a recibir métricas desde **CloudWatch**.
-- Verás tus servicios en:
-  - `Infrastructure > Host Map`
-  - `Dashboards > AWS Overview`
-  - `Monitors` para alertas como uso de CPU, errores, etc.
+```bash
+terraform init
+terraform apply
+```
 
----
+Esto crea una instancia EC2 (tipo `spot`) con:
 
-## 📊 Paso 4: Explorar dashboards preconfigurados
-
-Datadog genera automáticamente dashboards para servicios comunes:
-
-- EC2
-- RDS
-- Lambda
-- ELB
-- S3
-
-Puedes personalizarlos o crear los tuyos propios.
+- Acceso SSH, HTTP, HTTPS, SonarQube UI
+- Docker y Docker Compose instalados
+- Posibilidad de instalar el agente de Datadog vía `user_data`
 
 ---
 
-## 🔔 Paso 5: Crear alertas básicas
+## 📦 Instalación del agente de Datadog
 
-1. Ir a **Monitors > New Monitor**
-2. Seleccionar una métrica (ej: `AWS/EC2 CPUUtilization`)
-3. Definir umbral (ej: CPU > 85% durante 5 minutos)
-4. Especificar email o canal de Slack para alertas
+En la instancia EC2, ejecutar:
+
+```bash
+DD_API_KEY=<tu_api_key> DD_SITE="datadoghq.eu" bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+```
+
+Verificar con:
+
+```bash
+sudo datadog-agent status
+```
 
 ---
 
-## ✅ ¡Listo!
+## 🐳 Subir una imagen a ECR
 
-Ya estás monitoreando tu infraestructura de AWS usando Datadog sin necesidad de instalar agentes.
+1. Crear el repositorio:
+
+```bash
+aws ecr create-repository --repository-name mi-imagen-ecr --region eu-west-1
+```
+
+2. Login a ECR:
+
+```bash
+aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin <account>.dkr.ecr.eu-west-1.amazonaws.com
+```
+
+3. Build y push:
+
+```bash
+docker build -t mi-imagen-ecr .
+docker tag mi-imagen-ecr:latest <account>.dkr.ecr.eu-west-1.amazonaws.com/mi-imagen-ecr:latest
+docker push <account>.dkr.ecr.eu-west-1.amazonaws.com/mi-imagen-ecr:latest
+```
+
+---
+
+## ▶️ Ejecutar contenedor para que Datadog lo detecte
+
+```bash
+sudo docker run -d --name contenedor-prueba <account>.dkr.ecr.eu-west-1.amazonaws.com/mi-imagen-ecr:latest sleep 300
+```
+
+---
+
+## 📊 Ver métricas en Datadog
+
+1. Ir a [Infrastructure > Containers](https://app.datadoghq.eu/infrastructure)
+2. Usar filtros como:
+   - `container_name:contenedor-prueba`
+   - `image.name:<ecr-uri>`
+
+---
+
+## 🧹 Eliminar infraestructura
+
+```bash
+terraform destroy
+```
+
+---
+
+## 📝 Notas
+
+- Solo se ven imágenes en Datadog si están **en ejecución** como contenedor.
+- Para ver imágenes almacenadas en ECR sin ejecutarlas, es necesario conectar AWS a Datadog mediante **CloudFormation**.
+- La vista de vulnerabilidades requiere activar **Cloud Workload Security** (CWS).
+
+---
+
 
 ### MIT License
 ### Copyright (c) 2025 Jose Magariño
