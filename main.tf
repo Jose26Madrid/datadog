@@ -59,7 +59,6 @@ resource "aws_instance" "datadog_spot" {
 
   user_data = <<-EOF
               #!/bin/bash
-              DD_API_KEY=6739a1d9-9e8e-412e-875e-5533937e00f0 DD_SITE="datadoghq.eu" bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
               # Habilitar e iniciar Docker y herramientas de desarrollo
               yum install -y git docker
               systemctl enable docker
