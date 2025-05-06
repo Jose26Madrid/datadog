@@ -108,15 +108,6 @@ docker push <account>.dkr.ecr.eu-west-1.amazonaws.com/mi-imagen-ecr:latest
 ```
 
 ---
-
-## ▶️ Ejecutar contenedor para que Datadog lo detecte
-
-```bash
-sudo docker run -d --name contenedor-prueba <account>.dkr.ecr.eu-west-1.amazonaws.com/mi-imagen-ecr:latest sleep 300
-```
-
----
-
 ## 🔍 Ver métricas y vulnerabilidades en Datadog
 
 1. Ir a [Infrastructure > Containers](https://app.datadoghq.eu/infrastructure)
