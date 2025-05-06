@@ -5,7 +5,7 @@ Este proyecto demuestra cómo:
 - Crear una instancia EC2 con Terraform
 - Instalar el agente de Datadog
 - Subir imágenes Docker a ECR
-- Ejecutar contenedores y visualizar métricas en Datadog
+- Ejecutar contenedores y visualizar métricas y vulnerabilidades en Datadog
 
 ---
 
@@ -49,6 +49,42 @@ sudo datadog-agent status
 
 ---
 
+## ⚙️ Configuración del agente (`/etc/datadog-agent/datadog.yaml`)
+
+Agregar o modificar las siguientes secciones:
+
+```yaml
+container_image:
+  enabled: true
+
+sbom:
+  enabled: true
+  container_image:
+    enabled: true
+  host:
+    enabled: true
+```
+
+Reiniciar el agente:
+
+```bash
+sudo systemctl restart datadog-agent
+```
+
+---
+
+## ☁️ Integración de AWS con Datadog
+
+Para sincronizar imágenes de ECR sin ejecutarlas:
+
+1. En Datadog, ir a Integrations > Amazon Web Services
+2. Seguir el asistente y desplegar la plantilla de CloudFormation sugerida
+3. Asegurarse de activar las opciones:
+   - "ECR"
+   - "Cloud Security Posture Management" (si se desea ver vulnerabilidades)
+
+---
+
 ## 🐳 Subir una imagen a ECR
 
 1. Crear el repositorio:
@@ -81,10 +117,12 @@ sudo docker run -d --name contenedor-prueba <account>.dkr.ecr.eu-west-1.amazonaw
 
 ---
 
-## 📊 Ver métricas en Datadog
+## 🔍 Ver métricas y vulnerabilidades en Datadog
 
 1. Ir a [Infrastructure > Containers](https://app.datadoghq.eu/infrastructure)
-2. Usar filtros como:
+2. Para vulnerabilidades:
+   - [Cloud Security > Container Images](https://app.datadoghq.eu/cws/inventory/container-images)
+3. Usar filtros como:
    - `container_name:contenedor-prueba`
    - `image.name:<ecr-uri>`
 
@@ -97,15 +135,6 @@ terraform destroy
 ```
 
 ---
-
-## 📝 Notas
-
-- Solo se ven imágenes en Datadog si están **en ejecución** como contenedor.
-- Para ver imágenes almacenadas en ECR sin ejecutarlas, es necesario conectar AWS a Datadog mediante **CloudFormation**.
-- La vista de vulnerabilidades requiere activar **Cloud Workload Security** (CWS).
-
----
-
 
 ### MIT License
 ### Copyright (c) 2025 Jose Magariño
