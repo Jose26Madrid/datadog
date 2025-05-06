@@ -124,6 +124,7 @@ docker push <account>.dkr.ecr.eu-west-1.amazonaws.com/mi-imagen-ecr:latest
 ```bash
 terraform destroy
 ```
+Eliminar de cloudformation la pila, en iam deja el rol que creo por defecto.
 
 ---
 
