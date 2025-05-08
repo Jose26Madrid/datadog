@@ -160,7 +160,7 @@ Este documento describe cómo integrar tu cuenta de AWS con Datadog utilizando l
 2. Ve a **Roles > Create Role**.
 3. Selecciona **Another AWS Account**.
 4. Ingresa el ID de cuenta de Datadog:
-   - Para `us1`: `464622532012`
+   - Para `us1`: `xxxxx`
    - Otros sitios: ver [cuentas por región](https://docs.datadoghq.com/integrations/amazon_web_services/?tab=roledelegation)
 5. Activa **Require external ID** e ingresa el **External ID** que aparece en Datadog.
 6. Adjunta la política `ReadOnlyAccess` o una política personalizada proporcionada por Datadog.
